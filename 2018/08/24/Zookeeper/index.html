@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Zookeeper | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="[TOC] ###Zookeeper基础概念 ZooKeeper是一种分布式协调服务，用于管理大型主机。在分布式环境中协调和管理服务是一个复杂的过程。 ZooKeeper提供的常见服务如下 :  命名服务 - 按名称标识集群中的节点。它类似于DNS，但仅对于节点。  配置管理 - 加入节点的最近的和最新的系统配置信息。  集群管理 - 实时地在集群和节点状态中加入/离开节点。  选举算法 - 选举">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zookeeper">
+<meta property="og:url" content="http://yoursite.com/2018/08/24/Zookeeper/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="[TOC] ###Zookeeper基础概念 ZooKeeper是一种分布式协调服务，用于管理大型主机。在分布式环境中协调和管理服务是一个复杂的过程。 ZooKeeper提供的常见服务如下 :  命名服务 - 按名称标识集群中的节点。它类似于DNS，但仅对于节点。  配置管理 - 加入节点的最近的和最新的系统配置信息。  集群管理 - 实时地在集群和节点状态中加入/离开节点。  选举算法 - 选举">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-08-24T05:58:04.069Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Zookeeper">
+<meta name="twitter:description" content="[TOC] ###Zookeeper基础概念 ZooKeeper是一种分布式协调服务，用于管理大型主机。在分布式环境中协调和管理服务是一个复杂的过程。 ZooKeeper提供的常见服务如下 :  命名服务 - 按名称标识集群中的节点。它类似于DNS，但仅对于节点。  配置管理 - 加入节点的最近的和最新的系统配置信息。  集群管理 - 实时地在集群和节点状态中加入/离开节点。  选举算法 - 选举">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Zookeeper" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/08/24/Zookeeper/" class="article-date">
+  <time datetime="2018-08-24T05:57:39.000Z" itemprop="datePublished">2018-08-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Zookeeper
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>[TOC]</p>
+<p>###Zookeeper基础概念</p>
+<p>ZooKeeper是一种分布式协调服务，用于管理大型主机。在分布式环境中协调和管理服务是一个复杂的过程。</p>
+<p>ZooKeeper提供的常见服务如下 :</p>
+<ul>
+<li><p>命名服务 - 按名称标识集群中的节点。它类似于DNS，但仅对于节点。</p>
+</li>
+<li><p>配置管理 - 加入节点的最近的和最新的系统配置信息。</p>
+</li>
+<li><p>集群管理 - 实时地在集群和节点状态中加入/离开节点。</p>
+</li>
+<li><p>选举算法 - 选举一个节点作为协调目的的leader。</p>
+</li>
+<li><p>锁定和同步服务 - 在修改数据的同时锁定数据。此机制可帮助你在连接其他分布式应用程序（如Apache HBase）时进行自动故障恢复。</p>
+</li>
+<li><p>高度可靠的数据注册表 - 即使在一个或几个节点关闭时也可以获得数据。</p>
+</li>
+</ul>
+<p>####Zookeeper架构</p>
+<p>典型的 Server-client 集群模式,  Server端 每个 Zookeeper节点都代表着一个 Server, 其中 包括一个 Leader和若干个Follower, Server端 节点数必须是 大于3 才可以形成 一个<strong>Ensemble</strong></p>
+<p>zk中一个节点最多存储1M大小的数据. 每个节点都维护了一个stat 数据,用于存储 节点的元数据 如 时间戳,版本号，数据长度,操作控制列表</p>
+<p>####ZNode类型</p>
+<ul>
+<li><p>持久节点(默认)</p>
+<ul>
+<li>创建的节点当服务断开时候仍然存在 </li>
+</ul>
+</li>
+<li><p>临时节点</p>
+<ul>
+<li>客户端活跃时，临时节点就是有效的。当客户端与ZooKeeper集合断开连接时，临时节点会自动删除。因此，只有临时节点不允许有子节点。如果临时节点被删除，则下一个合适的节点将填充其位置。临时节点在leader选举中起着重要作用。</li>
+</ul>
+</li>
+<li><p>顺序节点</p>
+<ul>
+<li>顺序节点可以是 临时的也可以是持久的，这种节点在创建的时候会带上一个 序列号,如 /data/myapp 会被修改为 /data/myapp000000001 各个节点的序列号不同，顺序节点在锁和数据同步中有关键性的作用.</li>
+</ul>
+</li>
+</ul>
+<p>####Session</p>
+<p>zk中比较重要的概念, 每个Session都会有个 sessionId,当session结束时候会<strong>删除</strong>该Session下所有的临时节点。</p>
+<p>基于<strong>心跳</strong> 保证session是否有效. Session中的请求 以 <strong>FIFO</strong> 的形式执行.</p>
+<p>####监视</p>
+<p>client 可以在读取 Znode节点的时候设置 watches， 当Znode发生改变时候，会通知到对应的客户端.</p>
+<p>###Leader选举机制</p>
+<p>过程如下：</p>
+<p>各个节点创建同样的临时，顺序节点 ，目录为 /app/leader_election</p>
+<p>每个序列号观察比自己小的最近的节点，如0000002观察00001</p>
+<p>最小的节点自动成为leader</p>
+<p>当leader宕机时候，则通知到相应follower，follower找离自己最新的最小的节点，找不到，则该follower成为leader.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/08/24/Zookeeper/" data-id="cjl7lc36e0000ekqrjayma8qj" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/08/24/分布式锁/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          分布式锁
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/08/24/一致性哈希算法/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">一致性哈希算法</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/08/24/分布式锁/">分布式锁</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/Zookeeper/">Zookeeper</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/一致性哈希算法/">一致性哈希算法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/常见消息队列/">常见消息队列</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/zero-copy/">zero-copy</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

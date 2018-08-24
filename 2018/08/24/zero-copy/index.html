@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>zero-copy | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="[TOC] ###概念 当需要展示静态内容给用户时候，就需要做以下步骤: 1.读取文件内容到 kernel Buffer中  2.复制kernel Buffer到 User buffer中  3.复制User buffer到 kernel 的socker buffer中  4.kernel模式下的socket buffer 复制到网卡设备中 进行展示 可以看出，步骤2和3 其实是比较多余的， 因此">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zero-copy">
+<meta property="og:url" content="http://yoursite.com/2018/08/24/zero-copy/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="[TOC] ###概念 当需要展示静态内容给用户时候，就需要做以下步骤: 1.读取文件内容到 kernel Buffer中  2.复制kernel Buffer到 User buffer中  3.复制User buffer到 kernel 的socker buffer中  4.kernel模式下的socket buffer 复制到网卡设备中 进行展示 可以看出，步骤2和3 其实是比较多余的， 因此">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-08-24T05:55:40.475Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zero-copy">
+<meta name="twitter:description" content="[TOC] ###概念 当需要展示静态内容给用户时候，就需要做以下步骤: 1.读取文件内容到 kernel Buffer中  2.复制kernel Buffer到 User buffer中  3.复制User buffer到 kernel 的socker buffer中  4.kernel模式下的socket buffer 复制到网卡设备中 进行展示 可以看出，步骤2和3 其实是比较多余的， 因此">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-zero-copy" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/08/24/zero-copy/" class="article-date">
+  <time datetime="2018-08-24T05:55:20.000Z" itemprop="datePublished">2018-08-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      zero-copy
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>[TOC]</p>
+<p>###概念</p>
+<p>当需要展示静态内容给用户时候，就需要做以下步骤:</p>
+<pre><code>1.读取文件内容到 kernel Buffer中
+
+2.复制kernel Buffer到 User buffer中
+
+3.复制User buffer到 kernel 的socker buffer中
+
+4.kernel模式下的socket buffer 复制到网卡设备中 进行展示
+</code></pre><p>可以看出，步骤2和3 其实是比较多余的， 因此， Zero-copy 就完成了 这两个 步骤的去除,</p>
+<p>FileChannal.transferTo()方法就是这样的实现，这个实现是依赖于操作系统底层的sendFile()实现的。<br>步骤如图:</p>
+<p>[å¾ç]</p>
+<p>使用了Zero-copy后 整体步骤如下：</p>
+<pre><code>1.transferTo()[native方法]方法使得文件A的内容直接拷贝到一个read buffer（kernel buffer）中；(底层调用sendFile()方法)
+
+2.然后数据(kernel buffer)拷贝到socket buffer中。
+
+3.最后将socket buffer中的数据拷贝到网卡设备（protocol engine）中传输；
+</code></pre><p>但是这还不是真正的 Zero-copy， Zero-copy 是针对kernel 的.</p>
+<p>在Linux2.4版本中 对sendFile() 进行了升级, 改进后的处理如下:</p>
+<pre><code>1.将文件拷贝到kernel buffer中；
+
+2.向socket buffer中追加当前要发生的数据在kernel buffer中的位置和偏移量；
+
+3.根据socket buffer中的位置和偏移量直接将kernel buffer的数据copy到网卡设备（protocol engine）中；
+</code></pre><p>借此，实现了 Kernel 下的数据Zero-copy，大大提升了性能。</p>
+<p>###kafka下的Zero-copy的使用</p>
+<p>####kafka在什么场景下使用到了 zero-copy</p>
+<p>在消费者消费的时候.</p>
+<p>简单描述就是：</p>
+<pre><code>Consumer从Broker获取文件数据的时候，直接通过下面的方法进行channel到channel的数据传输。
+
+    java.nio.FileChannel.transferTo(long position, 
+    long count,                                
+    WritableByteChannel target)
+也就是说你的数据源是一个Channel,数据接收端也是一个Channel(SocketChannel),则通过该方式进行数据传输，是直接在内核态进行的，避免拷贝数据导致的内核态和用户态的多次切换。
+</code></pre><p>###参考资料</p>
+<p><a href="https://www.ibm.com/developerworks/linux/library/j-zerocopy/" target="_blank" rel="noopener">https://www.ibm.com/developerworks/linux/library/j-zerocopy/</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/08/24/zero-copy/" data-id="cjl7lc36u0002ekqraluczub7" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/08/24/常见消息队列/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          常见消息队列
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/08/24/消息队列原理剖析/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">消息队列原理剖析</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/08/24/分布式锁/">分布式锁</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/Zookeeper/">Zookeeper</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/一致性哈希算法/">一致性哈希算法</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/常见消息队列/">常见消息队列</a>
+          </li>
+        
+          <li>
+            <a href="/2018/08/24/zero-copy/">zero-copy</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
